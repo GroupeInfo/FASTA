@@ -3,13 +3,13 @@
 #include <fstream>
 #include <map>
 #include "Bitmap.h"
-#define BINSEPARATOR 8;
+#define BINSEPARATOR 8
 using namespace std;
 
 void printout(const string& s, ofstream& out);
 void transform(const map<string, string>& m, const string& c, string& s);
-void dostuff(const map<string,string>& liste, ifstream& finput, ofstream& foutput);
-void compare( ifstream& database, ifstream& query);
+string dostuff(const map<string,string>& liste, ifstream& finput, ofstream& foutput);
+bool compare( ifstream& database, string query);
 
 int main(int argc, char* argv[]){
 	ifstream inFile;
@@ -28,7 +28,8 @@ int main(int argc, char* argv[]){
 	
 	ifstream bitFile;
 	bitFile.open(argv[2]);
-	compare(fileIn,q);
+	bool foo = compare(fileIn,q);
+	cout<<foo<<endl;
 	return 0;
 }
 
@@ -48,7 +49,7 @@ void printout(const string& s, ofstream& out){
 	}
 
 string dostuff(const map<string,string>& liste, ifstream& finput, ofstream& foutput){
-		char sh;
+		char ch;
 		string str ="";
 		while( !finput.eof()){
 			finput >> ch;
@@ -70,12 +71,12 @@ bool compare(ifstream& database, string query){
 	int a = 0;
 	while( !database.eof()){
 		++counter;
-		finput >> c;
-		int binary = (int)c
+		database >> c;
+		int binary = (int)c;
 		bin[counter] = binary;
 		pa = &bin[counter];
 		if(counter>=BINSEPARATOR){
-			for(int i =0; i<BINSEPARATOR<++i){
+			for(int i =0; i<BINSEPARATOR;++i){
 				if(*(pa-i)== 0){
 					++a;
 				}
@@ -84,8 +85,8 @@ bool compare(ifstream& database, string query){
 		if(a==8){
 			int sequence_length = counter-BINSEPARATOR-1;
 			string s ="";
-			for(int j = 0;j<sequence_length<j++){
-				s.append(1,bin[j];
+			for(int j = 0;j<sequence_length;j++){
+				s.append(1,bin[j]);
 			}
 			if(s==query){
 				return true;
