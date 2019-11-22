@@ -9,7 +9,7 @@ using namespace std;
 void printout(const string& s, ofstream& out);
 void transform(const map<string, string>& m, const string& c, string& s);
 string dostuff(const map<string,string>& liste, ifstream& finput, ofstream& foutput);
-bool compare( ifstream& database, string query);
+int compare( ifstream& database, string query);
 
 int main(int argc, char* argv[]){
 	ifstream inFile;
@@ -26,9 +26,9 @@ int main(int argc, char* argv[]){
 		}
 	string q = dostuff(Bitmap,inFile, outFile);
 	
-	ifstream bitFile;
-	bitFile.open(argv[2]);
-	bool foo = compare(fileIn,q);
+	//ifstream bitFile;
+	//bitFile.open(argv[2]);
+	int foo = compare(fileIn,q);
 	cout<<foo<<endl;
 	return 0;
 }
@@ -59,45 +59,47 @@ string dostuff(const map<string,string>& liste, ifstream& finput, ofstream& fout
 			}
 		finput.close();
 		printout(str,foutput);
-		//cout<<str<<endl;
 		return str;
 }
 
-bool compare(ifstream& database, string query){
+int compare(ifstream& database, string query){
 	char c;
-	int bin[150];
-	int counter = 0;
-	int* pa = NULL;
-	int a = 0;
+	string bin[20];
+	int counter = -1;
+	int counter2 = 0;
+	string* pa = NULL;
+	bool foo = false;
+	string swr = "";
 	while( !database.eof()){
 		++counter;
 		database >> c;
-		int binary = (int)c;
-		bin[counter] = binary;
-		pa = &bin[counter];
-		if(counter>=BINSEPARATOR){
-			for(int i =0; i<BINSEPARATOR;++i){
-				if(*(pa-i)== 0){
-					++a;
+		swr.append(1,c);
+		if(counter==7){
+			bin[counter2] = swr;
+			pa = &bin[counter2];
+			cout<<bin[counter2]<<endl;
+			++counter2;
+			counter = -1;
+			if(swr=="00000000"){
+				foo = true;
 				}
-			}
+			swr="";
 		}
-		if(a==8){
-			int sequence_length = counter-BINSEPARATOR-1;
+		if(foo==true){
+			int sequence_length = counter2-1;
 			string s ="";
-			for(int j = 0;j<sequence_length;j++){
-				s.append(1,bin[j]);
+			for(int j = 0; j<sequence_length; j++){
+				s+=bin[j];
 			}
 			if(s==query){
-				return true;
+				cout<<"wohoooo"<<endl;
+				return 1;
 			}
 			else{
-				counter = 0;
+				counter2=0;
+				foo = false;
 				}
 			
-		}
-		else{
-			a=0;
 		}
 	}
 }
