@@ -65,29 +65,22 @@ int main(){
 		MaximumSequence = __builtin_bswap32(MaximumSequence);
 		cout<<"Maximum Sequence: " << MaximumSequence<<endl;
 		
-		int counter2 = 0;
+		
 		uint32_t HeaderOffsetTable[N+1];
+		f.read((char*)&HeaderOffsetTable, N*sizeof(uint32_t));
 		for(unsigned int i=0; i<N+1; ++i){
-			++counter2;
-			f.read((char*)&HeaderOffsetTable[i], sizeof(uint32_t));
+			//f.read((char*)&HeaderOffsetTable[i], sizeof(uint32_t));
 			HeaderOffsetTable[i] = __builtin_bswap32(HeaderOffsetTable[i]);
-		}
-		for(unsigned int i=0; i<N+1; ++i){
-			cout<<"header Offset: " << HeaderOffsetTable[i]<<endl;
+			//cout<<"header Offset: " << HeaderOffsetTable[i]<<endl;
 		}
 		
 		uint32_t sequenceOffsetTable[N+1];
+		f.read((char*)&sequenceOffsetTable, N*sizeof(uint32_t));
 		for(unsigned int i=0; i<N+1; ++i){
-			f.read((char*)&sequenceOffsetTable[i], sizeof(uint32_t));
+			//f.read((char*)&sequenceOffsetTable[i], sizeof(uint32_t));
 			sequenceOffsetTable[i] = __builtin_bswap32(sequenceOffsetTable[i]);
+			//cout<<"Sequence Offset: " << sequenceOffsetTable[i]<<endl;
 		}
-		int counter = 0;
-		for(unsigned int i=0; i<N+1; ++i){
-			++counter;
-			cout<<"Sequence Offset: " << sequenceOffsetTable[i]<<endl;
-		}
-		cout<<"je t'ai affiché"<<counter<<" offset de sequences"<<endl;
-		cout<<"je t'ai affiché"<<counter2<<" offset de header"<<endl;
 	}
 	return 0;
 };
