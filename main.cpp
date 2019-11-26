@@ -1,86 +1,38 @@
 #include <iostream>
-#include <string>
-#include <fstream>
+#include "pin.h"
 using namespace std;
-int main(){
-	//int titlelength;
-	//char timeStampLength; 
-	//char timeStamp;
-	//char numberOfSequences;
-	//char maximumLength;
-	//char headerOffsetTable;
-	//char sequenceOffsetTable;
-	//char ambiguityOffsetTable;
-	int N;
-	ifstream f ("uniprot_sprot.fasta.pin", ios::out|ios ::binary);
+
+int main()
+{
+	//pinStuff("uniprot_sprot.fasta.pin");
+	vector<BYTE> data = readFile("uniprot_sprot.fasta.pin");
+	int index = 0;
+	int version = read_int32(data, index);
+	int database_type = read_int32(data, index);
+	int title_length = read_int32(data, index);
+	string title = read_string(data, index, title_length);
+	int timestamp_length = read_int32(data, index);
+	string timestamp = read_string(data, index, timestamp_length);
+	int number_of_sq = read_int32(data, index);
+	int residue_count = read_int64(data, index);
+	int max_sq = read_int32(data, index);
+	/*int* header_offset_table = read_int32_array(data, index, number_of_sq+1);
+	int* sequence_offset_table = read_int32_array(data, index, number_of_sq+1);*/
+
+
+	cout << "version " << version <<endl;
+	cout << "Database Type " << database_type << endl;
+	cout << "Title length " << title_length << endl;
+	cout << "The title is " << title << endl;
+	cout << "The timestamp length " << timestamp_length << endl;
+	cout << "The timestamp length is " << timestamp << endl;
+	cout << "The number of sequeces is  " << number_of_sq << endl;
+	cout << "The residue count is  " << residue_count << endl;
+	cout << "The length of the longest sequence is  " << max_sq << endl;
+
+	/*for (int i = 0; i < number_of_sq+1; i++) {
+		cout << sequence_offset_table[i] << endl;	
+	}*/
 	
-	if(!f.is_open()){
-		cout<<"impossible d'ouvrire le fichier !"<<endl;
-		}
-	else{
-		uint32_t version ;
-		f.read((char*)&version,sizeof(uint32_t));
-		version = __builtin_bswap32(version);
-		cout<<"Version : " << version<<endl;
-		
-		uint32_t databaseType ;
-		f.read((char*)&databaseType,sizeof(uint32_t));
-		databaseType = __builtin_bswap32(databaseType);
-		cout<<"DatabaseType : " << databaseType<<endl;
-		
-		uint32_t titleLength ;
-		f.read((char*)&titleLength,sizeof(uint32_t));
-		titleLength = __builtin_bswap32(titleLength);
-		cout<<"Title length : " << titleLength<<endl;	
-		
-		char titleString[titleLength];
-		for(unsigned int i=0; i<titleLength; ++i){
-			f.read((char*)&titleString[i], sizeof(char));
-		}
-		cout<<"Title string : "<<titleString<<endl;
-		
-		uint32_t timestampLength ;
-		f.read((char*)&timestampLength,sizeof(uint32_t));
-		timestampLength = __builtin_bswap32(timestampLength);
-		cout<<"timestamp length : " << timestampLength<<endl;
-		
-		char timestamp[timestampLength];
-		for(unsigned int i=0; i<timestampLength; ++i){
-			f.read((char*)&timestamp[i], sizeof(char));
-		}
-		cout<<"timestamp : "<<timestamp<<endl;
-		
-		uint32_t sequencesNumber ;
-		f.read((char*)&sequencesNumber,sizeof(uint32_t));
-		sequencesNumber = __builtin_bswap32(sequencesNumber);
-		cout<<"Number of sequences : " << sequencesNumber<<endl;
-		N = sequencesNumber;
-		
-		uint64_t residuesNumber ;
-		f.read((char*)&residuesNumber,sizeof(uint64_t));
-		cout<<"Total number of residues : " << residuesNumber<<endl;
-		
-		uint32_t MaximumSequence ;
-		f.read((char*)&MaximumSequence,sizeof(uint32_t));
-		MaximumSequence = __builtin_bswap32(MaximumSequence);
-		cout<<"Maximum Sequence: " << MaximumSequence<<endl;
-		
-		
-		uint32_t HeaderOffsetTable[N+1];
-		f.read((char*)&HeaderOffsetTable, N*sizeof(uint32_t));
-		for(unsigned int i=0; i<N+1; ++i){
-			//f.read((char*)&HeaderOffsetTable[i], sizeof(uint32_t));
-			HeaderOffsetTable[i] = __builtin_bswap32(HeaderOffsetTable[i]);
-			//cout<<"header Offset: " << HeaderOffsetTable[i]<<endl;
-		}
-		
-		uint32_t sequenceOffsetTable[N+1];
-		f.read((char*)&sequenceOffsetTable, N*sizeof(uint32_t));
-		for(unsigned int i=0; i<N+1; ++i){
-			//f.read((char*)&sequenceOffsetTable[i], sizeof(uint32_t));
-			sequenceOffsetTable[i] = __builtin_bswap32(sequenceOffsetTable[i]);
-			//cout<<"Sequence Offset: " << sequenceOffsetTable[i]<<endl;
-		}
-	}
 	return 0;
-};
+}
