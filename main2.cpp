@@ -118,7 +118,13 @@ void search(const map<char,int>& map, ifstream& sequenceDB, const vector<char>& 
 					sequenceDB.read((char *)&sh, sizeof(char));
 					fill(map,stringSequence,(int)sh);
 				}
+				//imprimer la taille de la séquence query trouvé:
 				cout<<"sizeof stringSequence :"<<stringSequence.size()<<endl;
+				cout<<"numéro de séquence vaut"<<k<<endl;
+				//on peut aussi imprimer la sequence facilement...
+				auto end = std::chrono::steady_clock::now();
+				double elapsed_time_ns = double(std::chrono::duration_cast <std::chrono::nanoseconds> (end - start).count());
+				cout<<"Elapsed time (s): " << elapsed_time_ns /1e9<< endl;
 				break;
 			}
 		}
