@@ -91,6 +91,7 @@ int main(int argc, char* argv[]){
 		string str = getName(f3,sequenceNumber,HeaderOffsetTable);
 		cout<<"The query corresponds to : "<<str<<endl;
 	}
+	f.close(); f2.close(); f3.close(); f4.close();
 	return 0;
 	
 };
@@ -117,11 +118,10 @@ int  search(const map<char,int>& map, ifstream& sequenceDB, const vector<char>& 
 					sequenceDB.read((char *)&sh, sizeof(char));
 					fill(map,stringSequence,(int)sh);
 				}
-				return k;
 				auto end = std::chrono::steady_clock::now();
 				double elapsed_time_ns = double(std::chrono::duration_cast <std::chrono::nanoseconds> (end - start).count());
 				cout<<"Elapsed time (s): " << elapsed_time_ns /1e9<< endl;
-				break;
+				return k;
 			}
 		}
 	}
