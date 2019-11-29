@@ -18,61 +18,61 @@ vector<char> queryToVector(ifstream& queryFile);
 
 auto start = std::chrono::steady_clock::now();
 int main(int argc, char* argv[]){
-	ifstream f (argv[1], ios::out|ios ::binary);
-	ifstream f2 (argv[2], ios::out|ios::binary);
-	ifstream f3 (argv[3], ios::out|ios::binary);
-	ifstream f4 (argv[4]);
+	ifstream f (argv[1], ios::out|ios ::binary); // Database index file
+	ifstream f2 (argv[2], ios::out|ios::binary); // Database sequences (one after another)
+	ifstream f3 (argv[3], ios::out|ios::binary); // Database sequence headers
+	ifstream f4 (argv[4]); // Queried sequence (please make sure the file contains ONLY the sequence)
 	if(!f.is_open() || !f2.is_open() || !f3.is_open() || !f4.is_open()){
-		cout<<"impossible d'ouvrire un des fichiers !"<<endl;
+		cout<<"Impossible d'ouvrir un des fichiers."<<endl;
 		exit(1);
 		}
 	else{
 		uint32_t version ;
 		f.read((char*)&version,sizeof(uint32_t));
 		version = __builtin_bswap32(version);
-		cout<<"Version : " << version<<endl;
+		cout<<"The version number is " << version<<endl;
 		
 		uint32_t databaseType ;
 		f.read((char*)&databaseType,sizeof(uint32_t));
 		databaseType = __builtin_bswap32(databaseType);
-		cout<<"DatabaseType : " << databaseType<<endl;
+		cout<<"The database type is " << databaseType<<endl;
 		
 		uint32_t titleLength ;
 		f.read((char*)&titleLength,sizeof(uint32_t));
 		titleLength = __builtin_bswap32(titleLength);
-		cout<<"Title length : " << titleLength<<endl;	
+		cout<<"The length of the title string is " << titleLength<<endl;	
 		
 		char titleString[titleLength];
 		for(unsigned int i=0; i<titleLength; ++i){
 			f.read((char*)&titleString[i], sizeof(char));
 		}
-		cout<<"Title string : "<<titleString<<endl;
+		cout<<"The title string is "<<titleString<<endl;
 		
 		uint32_t timestampLength ;
 		f.read((char*)&timestampLength,sizeof(uint32_t));
 		timestampLength = __builtin_bswap32(timestampLength);
-		cout<<"timestamp length : " << timestampLength<<endl;
+		cout<<"The length of the timestamp string is " << timestampLength<<endl;
 		
 		char timestamp[timestampLength];
 		for(unsigned int i=0; i<timestampLength; ++i){
 			f.read((char*)&timestamp[i], sizeof(char));
 		}
-		cout<<"timestamp : "<<timestamp<<endl;
+		cout<<"The time of the database creation is "<<timestamp<<endl;
 		
 		uint32_t sequencesNumber ;
 		f.read((char*)&sequencesNumber,sizeof(uint32_t));
 		sequencesNumber = __builtin_bswap32(sequencesNumber);
-		cout<<"Number of sequences : " << sequencesNumber<<endl;
+		cout<<"The number of sequences in the database is " << sequencesNumber<<endl;
 		int N = sequencesNumber;
 		
 		uint64_t residuesNumber ;
 		f.read((char*)&residuesNumber,sizeof(uint64_t));
-		cout<<"Total number of residues : " << residuesNumber<<endl;
+		cout<<"The total number of residues in the database is " << residuesNumber<<endl;
 		
 		uint32_t MaximumSequence ;
 		f.read((char*)&MaximumSequence,sizeof(uint32_t));
 		MaximumSequence = __builtin_bswap32(MaximumSequence);
-		cout<<"Maximum Sequence: " << MaximumSequence<<endl;
+		cout<<"The length of the longest sequence in the database is " << MaximumSequence<<endl;
 		
 		uint32_t HeaderOffsetTable[N+1];
 		for(unsigned int i=0; i<N+1; ++i){
@@ -102,7 +102,7 @@ int  search(const map<char,int>& map, ifstream& sequenceDB, const vector<char>& 
 	int k = 0;
 	while(!sequenceDB.eof()){
 		sequenceDB.read((char *)&c, sizeof(char));
-		char ch=transform2(map, (int)c);
+		char ch=transform2(map, (int)c); // ch is the translated c character
 		if(ch!=vec[i]){
 			++k;
 			sequenceDB.seekg(seqOffTab[k]); 
