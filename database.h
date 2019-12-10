@@ -23,7 +23,7 @@ class database{
 	
 	public:
 		//-Constructeur-//
-		database();
+		database(char* buffer);
 		//-get et set-//
 		uint32_t database::getVersion();
 		uint32_t database::getDatabaseType();

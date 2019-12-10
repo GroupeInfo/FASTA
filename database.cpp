@@ -2,7 +2,7 @@
 const char table[28]={'-','A','B','C','D','E','F','G','H','I','K','L','M','N','P','Q','R','S','T','V','W','X','Y','Z','U','*','O','J'};
 
 //===Constructeur===//
-database::database() {
+database::database(char* buffer) {
 	// Enregistrer aussi les longueurs ?
 	private:
 	uint32_t version;
@@ -16,6 +16,8 @@ database::database() {
 	uint32_t maximumSequence;
 	uint32_t** pHeaderOffsetTable;
 	uint32_t** pSequenceOffsetTable;
+	
+	char* text=buffer;
 	
 }
 
@@ -61,13 +63,7 @@ uint32_t* database::pSequenceOffsetTable(){
 }
 
 
-void database::doData(char* argv[]) {
-	ifstream f (argv[1], ios::out|ios ::binary); // Database index file
-	
-	if(!f.is_open()){
-		cout<<"Impossible d'ouvrir un des fichiers."<<endl;
-		exit(1);
-	}
+void database::dopin() {
 	
 	//--Version--//
 	f.read((char*)&database::version,sizeof(uint32_t));
@@ -127,7 +123,7 @@ void database::doData(char* argv[]) {
 		f.read((char*)&HeaderOffsetTable[i], sizeof(uint32_t));
 		HeaderOffsetTable[i] = __builtin_bswap32(HeaderOffsetTable[i]);
 	}
-	database::pHeaderOffsetTable=&HeaderOffsetTable;
+	database::pHeaderOffsetTable=*HeaderOffsetTable;
 	
 	//--sequenceOffsetTable--//
 	uint32_t sequenceOffsetTable[N+1];
@@ -135,9 +131,68 @@ void database::doData(char* argv[]) {
 		f.read((char*)&sequenceOffsetTable[i], sizeof(uint32_t));
 		sequenceOffsetTable[i] = __builtin_bswap32(sequenceOffsetTable[i]);
 	}
-	database::pSequenceOffsetTable=&sequenceOffsetTable;
+	database::pSequenceOffsetTable=*sequenceOffsetTable;
+}
+
+vector<char> database::doquery() {
+	vector<char> vect;
+	char ch;
+	// read() != EOF ?
+	while(!queryFile.eof()) {
+		queryFile >> ch;
+		vect.push_back(ch);
+	}
+	vect.pop_back();
+	return vect;
+}
+
+void database::dophr() {
+	char c;
+	int i = 0;
+	int k = 0;
+	while(!sequenceDB.eof()){
+		sequenceDB.read((char *)&c, sizeof(char));
+		////char ch=transform2(map, (int)c); // ch is the translated c character
+		char ch = table[(int c];
+		if(ch!=vec[i]){
+			++k;
+			sequenceDB.seekg(seqOffTab[k]); 
+			i=0;
+		}
+		else{
+			i++;
+			if(i==((seqOffTab[k+1])-(seqOffTab[k]))-1){
+				char sh;
+				vector<char> stringSequence;
+				sequenceDB.seekg(seqOffTab[k]);
+				for(int j =0; j<i; j++){
+					sequenceDB.read((char *)&sh, sizeof(char));
+					fill(map,stringSequence,(int)sh);
+				}
+				auto end = std::chrono::steady_clock::now();
+				double elapsed_time_ns = double(std::chrono::duration_cast <std::chrono::nanoseconds> (end - start).count());
+				cout<<"Elapsed time (s): " << elapsed_time_ns /1e9<< endl;
+				return k;
+			}
+		}
+	}
 	
-	f.close();
+}
+string database::dopsq(int seqNum, uint32_t headOffTab[]){
+	string s;
+	char sh;
+	int offset = headOffTab[seqNum];
+	headerDB.seekg(offset+7);
+	headerDB.read((char *)&sh, sizeof(sh));
+	int length = (int)sh;
+	headerDB.seekg(offset+8);
+	for(unsigned int i=0; i<length; i++){
+		headerDB.read((char *)&sh, sizeof(char));
+		s.append(1,sh);
+		}
+	return s;
+}
+	/*f.close();
 	
 	ifstream f4 (argv[4], ios::out|ios ::binary); // Database index file
 	
@@ -204,4 +259,4 @@ int search(const char table[], ifstream& sequenceDB, const vector<char>& vec,uin
 			}
 		}
 	}
-}
+}*/
