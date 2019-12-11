@@ -3,22 +3,7 @@ const char table[28]={'-','A','B','C','D','E','F','G','H','I','K','L','M','N','P
 
 //===Constructeur===//
 database::database(char* buffer) {
-	// Enregistrer aussi les longueurs ?
-	private:
-	uint32_t version;
-	uint32_t databaseType;
-	uint32_t titleLength;
-	char** titleString;
-	uint32_t timestampLength;
-	char** timestamp;
-	uint32_t sequencesNumber;
-	uint32_t residuesNumber;
-	uint32_t maximumSequence;
-	uint32_t** pHeaderOffsetTable;
-	uint32_t** pSequenceOffsetTable;
-	
 	char* text=buffer;
-	
 }
 
 //===Fonctions===//
@@ -58,7 +43,7 @@ uint32_t* database::getHeaderOffsetTable(){
 	return *pHeaderOffsetTable;
 }
 
-uint32_t* database::pSequenceOffsetTable(){
+uint32_t* database::getSequenceOffsetTable(){
 	return *pSequenceOffsetTable;
 }
 
@@ -66,69 +51,80 @@ uint32_t* database::pSequenceOffsetTable(){
 void database::dopin() {
 	
 	//--Version--//
-	f.read((char*)&database::version,sizeof(uint32_t));
+	//((string)text).read((char*)&version,sizeof(uint32_t));
+	version = (uint32_t) text[1];
 	version = __builtin_bswap32(version);
 	cout<<"The version number is " <<version<<endl;
 	
 	//--databaseType--//
-	f.read((char*)&database::databaseType,sizeof(uint32_t));
+	//f.read((char*)&database::databaseType,sizeof(uint32_t));
+	databaseType = (uint32_t) text[2];
 	databaseType = __builtin_bswap32(databaseType);
 	cout<<"The database type is " << databaseType<<endl;
 	
 	//--titleLength--//
-	f.read((char*)&database::titleLength,sizeof(uint32_t));
+	//f.read((char*)&database::titleLength,sizeof(uint32_t));
+	titleLength = (uint32_t) text[3];
 	titleLength = __builtin_bswap32(titleLength);
 	cout<<"The length of the title string is " << titleLength<<endl;
 	
 	//--titleString--//
 	char titleString[titleLength];
 	for(unsigned int i=0; i<titleLength; ++i){
-		f.read((char*)&titleString[i], sizeof(char));
+		//f.read((char*)&titleString[i], sizeof(char));
+		titleString[i]=text[i+3];
 	}
 	cout<<"The title string is "<<titleString<<endl;
 	database::titleString=&titleString;
 	
 	//--timestampLength--//
-	f.read((char*)&database::timestampLength,sizeof(uint32_t));
+	//f.read((char*)&database::timestampLength,sizeof(uint32_t));
+	timestampLength = (uint32_t) text[4+titleLength];
 	timestampLength = __builtin_bswap32(timestampLength);
 	cout<<"The length of the timestamp string is " << timestampLength<<endl;
 	
 	//--timestamp--//
 	char timestamp[timestampLength];
 	for(unsigned int i=0; i<timestampLength; ++i){
-		f.read((char*)&timestamp[i], sizeof(char));
+		//f.read((char*)&timestamp[i], sizeof(char));
+		timestamp[i] = text[4+titleLength+i]
 	}
 	cout<<"The time of the database creation is "<<timestamp<<endl;
 	database::timestamp=&timestamp;
 	
 	//--sequencesNumber--//
-	f.read((char*)&database::sequencesNumber,sizeof(uint32_t));
+	//f.read((char*)&database::sequencesNumber,sizeof(uint32_t));
+	sequencesNumber = (uint32_t) text[5+titleLength+timestampLength];
 	sequencesNumber = __builtin_bswap32(sequencesNumber);
 	cout<<"The number of sequences in the database is " << sequencesNumber<<endl;
 	
-	int N = database::sequencesNumber; // Vrai gain ?? Assignation de la variable utile ?
+	//int N = database::sequencesNumber; // Vrai gain ?? Assignation de la variable utile ?
 	
 	//--residuesNumber--//
-	f.read((char*)&database::residuesNumber,sizeof(uint64_t));
+	//f.read((char*)&database::residuesNumber,sizeof(uint64_t));
+	residuesNumber = (uint32_t) text[6+titleLength+timestampLength];
 	cout<<"The total number of residues in the database is " << residuesNumber<<endl;
 	
 	//--maximumSequence--//
-	f.read((char*)&database::maximumSequence,sizeof(uint32_t));
-	MaximumSequence = __builtin_bswap32(MaximumSequence);
+	//f.read((char*)&database::maximumSequence,sizeof(uint32_t));
+	maximumSequence = (uint32_t) text[7+titleLength+timestampLength];
+	maximumSequence = __builtin_bswap32(maximumSequence);
 	cout<<"The length of the longest sequence in the database is " << MaximumSequence<<endl;
 	
 	//--headerOffsetTable--//
-	uint32_t headerOffsetTable[N+1];
+	uint32_t headerOffsetTable[sequencesNumber+1];
 	for(unsigned int i=0; i<N+1; ++i){
-		f.read((char*)&HeaderOffsetTable[i], sizeof(uint32_t));
+		//f.read((char*)&HeaderOffsetTable[i], sizeof(uint32_t));
+		maximumSequence = (uint32_t) text[7+titleLength+timestampLength];
 		HeaderOffsetTable[i] = __builtin_bswap32(HeaderOffsetTable[i]);
 	}
 	database::pHeaderOffsetTable=*HeaderOffsetTable;
 	
 	//--sequenceOffsetTable--//
-	uint32_t sequenceOffsetTable[N+1];
+	uint32_t sequenceOffsetTable[sequencesNumber+1];
 	for(unsigned int i=0; i<N+1; ++i){
-		f.read((char*)&sequenceOffsetTable[i], sizeof(uint32_t));
+		//f.read((char*)&sequenceOffsetTable[i], sizeof(uint32_t));
+		sequencesNumber = (uint32_t) text[8+titleLength+timestampLength];
 		sequenceOffsetTable[i] = __builtin_bswap32(sequenceOffsetTable[i]);
 	}
 	database::pSequenceOffsetTable=*sequenceOffsetTable;
@@ -138,8 +134,11 @@ vector<char> database::doquery() {
 	vector<char> vect;
 	char ch;
 	// read() != EOF ?
-	while(!queryFile.eof()) {
-		queryFile >> ch;
+	int taille_text=sizeof(text)/sizeof(char);
+	
+	//while(!queryFile.eof()) {
+	for (int i=0; i<taille_text; i++) {
+		texte[i] >> ch;
 		vect.push_back(ch);
 	}
 	vect.pop_back();
@@ -150,8 +149,12 @@ void database::dophr() {
 	char c;
 	int i = 0;
 	int k = 0;
-	while(!sequenceDB.eof()){
-		sequenceDB.read((char *)&c, sizeof(char));
+	int taille_text=sizeof(text)/sizeof(char);
+	
+	//while(!sequenceDB.eof()){
+	for (int i=0; i<taille_text; i++) {
+		//sequenceDB.read((char *)&c, sizeof(char));
+		c = text[i];
 		////char ch=transform2(map, (int)c); // ch is the translated c character
 		char ch = table[(int c];
 		if(ch!=vec[i]){

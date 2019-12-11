@@ -37,10 +37,10 @@ int main(int argc, char* argv[]) {
 		exit(1)
 	}
 	
-	database pin(create_buffer_bin(fpin));
-	database phr(create_buffer_bin(fphr));
-	database psq(create_buffer_bin(fpsq));
-	database query(create_buffer_bin(fpsq));
+	database pin(fpin);
+	database phr(fphr);
+	database psq(fpsq);
+	database query(fpsq);
 	
 	pin.dopin();
 	vect<char> queryVector = query.doquery();
