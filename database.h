@@ -1,47 +1,39 @@
-#include <iostream>
+#include <string>
 #include <vector>
-#include <fstream>
-#include <string.h>
-#include <stdio.h>
-#include <stdint.h>
-using namespace std;
+#include <iostream>
+#include "query.h"
+using std::vector;
+using std::string;
 
-class database {
+class Database {
 	
-	private:
-		char* text;
-		
+	private :	
+		string filename;
 		uint32_t version;
 		uint32_t databaseType;
 		uint32_t titleLength;
-		char** titleString;
+		string title;
 		uint32_t timestampLength;
-		char** timestamp;
-		uint32_t sequencesNumber;
-		uint32_t residuesNumber;
-		uint32_t maximumSequence;
-		uint32_t** pHeaderOffsetTable;
-		uint32_t** pSequenceOffsetTable;
-	
-	public:
-		//-Constructeur-//
-		database(char* buffer);
-		//-get et set-//
-		uint32_t getVersion();
-		uint32_t getDatabaseType();
-		uint32_t getTitleLength();
-		char* getTitleString();
-		uint32_t getTimestampLength();
-		char* getTimestamp();
-		uint32_t getSequencesNumber();
-		uint32_t getResiduesNumber();
-		uint32_t getMaximumSequence();
-		uint32_t* getHeaderOffsetTable();
-		uint32_t* getSequenceOffsetTable();
+		string timestamp;
+		uint32_t nbrSequences;
+		uint32_t nbrResidues;
+		uint32_t maxSequence;
+		vector<int> headerOffsets;
+		vector<int> sequenceOffsets;
+		vector<Protein> proteins;
+
+		void loadData(const string &filename);
+		void loadProteins(const string &filename);
+		void loadHeaders(const string &filename);
 		
-		void dopin();
-		vector<char> doquery();
-		void dophr();
-		
+	public : 
+		Database(string dbName);
+		//~Database();
+		void printInfos(std::ostream & out = std::cout);
+		void loadDb(const string dbName);
+		Protein & getProtein(unsigned int index); 
+		int getNbrSequences();
 		
 };
+
+
