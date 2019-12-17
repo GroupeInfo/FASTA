@@ -22,3 +22,10 @@ class Protein {
 		string getHeader();
 		void setHeader(string header);
 		const char getResidue(int i) const;
+		//return the lenght of the sequence
+		const int size() const;
+		void print(std::ostream & out = std::cout);
+		//define the == operator for Protein --> we can do : proteinA == proteinB
+		//two proteins are equal if they have the same sequence
+	
+};
