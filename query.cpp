@@ -4,7 +4,7 @@
 #include "query.h"
 
 using namespace std;
-
+/*Query est une sous-classe de la classe protéine....*/
 Query::Query() {}
 
 Query::Query(char* sequence, int length, string header) {
@@ -14,7 +14,7 @@ Query::Query(char* sequence, int length, string header) {
 }
 
 Query::~Query(){}
-
+/*Fonction propre à query permettant de faire un set de la séquence et du header directement à partir du fichier (P00533.fasta)*/
 void Query::loadFromFile(const string filename) { 
 	string line;
 	string str;
@@ -42,7 +42,7 @@ void Query::loadFromFile(const string filename) {
 	}
 }
 
-
+/*Fonction permettant d'obtenir la séquence query décodée*/
 string Query::decodeQuery() {
 	string decodedSequence = "";
 	
@@ -120,6 +120,7 @@ int Query::getInt(char letter){
 	return -1;
 }
 
+/*imprime la query (les lettres de la séquence))*/
 void Query::print(ostream& out) {
 	out << header << "\n";
 	out << decodeQuery() << endl;

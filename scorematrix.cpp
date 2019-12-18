@@ -5,6 +5,11 @@
 #include <algorithm>
 using namespace std;
 
+/*le constructeur de Scorematrix ouvre le fichier BLOSUM et place dans le vector matrix
+ *les résultats de combinaisons. L'ordre ne suit pas celui du fichier BLOSUM(A puis R...) mais
+ * plutot l'odre suivi dans le fichier psq (- puis A ...), ordre du décodeur ci-dessous.
+ * Ceci permettera un accès directe à un résultat de combinaisons particulier.
+ * */
 ScoreMatrix::ScoreMatrix(const string & filename, int nbrCols) {
 	aminoAcids = "";
 	ifstream file;
@@ -46,12 +51,13 @@ ScoreMatrix::ScoreMatrix(const string & filename, int nbrCols) {
 		j++;
 	}
 }
-
+/*Fonction permettant d'enlever les espaces, utile car dans le ficheir BLOUSM les amino acides sont séparés par des espaces*/
 string ScoreMatrix::removeSpaces(string input){
   input.erase(std::remove(input.begin(),input.end(),' '),input.end());
   return input;
 }
 
+/*retourne l'index d'un caractère dans le décodeur*/
 int ScoreMatrix::decode(char c){
 	unsigned int i = 0;
 	while(i<decoder.size()){
@@ -65,6 +71,7 @@ int ScoreMatrix::decode(char c){
 	return i;
 }
 
+/*Opérateur facilitant l'accès à un élement dans la matrice*/
 int & ScoreMatrix::operator()(char i, char j) {
 	return matrix[nbrCols * i + j]; 
 	
