@@ -1,12 +1,14 @@
 #include "database.h"
 #include "scorematrix.h"
+#include "threadpool.h"
 #include <algorithm>
 #include <iostream>
+#include <utility>
 #include <time.h>
 
 using namespace std;
 
-void gotoh(Database& data, ScoreMatrix& blosum, Query& query, int protIndex, int ext_penalty, int sum_penalty) {
+void gotoh(Database& data, ScoreMatrix& blosum, Query& query, vector<pair<int, int>>& results, int protIndex, int ext_penalty, int sum_penalty) {
 	
 	Protein& prot = data.getProtein(protIndex);
 	
@@ -36,8 +38,6 @@ void gotoh(Database& data, ScoreMatrix& blosum, Query& query, int protIndex, int
 		// Valeurs de fin de récurrence de E et H
 		E = 0; // E = E[i,j]
 		H_diag = 0; // H_diag = H[i-1,j-1]
-		//cout << "H_diag0 = " << H_diag << endl;
-		//cout << "E0 = " << E << endl;
 		
 		for (unsigned int j = 1; j <= m; j++) {
 			// E[i,j] = max(H[i,j-1] - Q, E[i,j-1] - R)
@@ -46,17 +46,11 @@ void gotoh(Database& data, ScoreMatrix& blosum, Query& query, int protIndex, int
 			F[j] = max(H[j] - sum_penalty, F[j] - ext_penalty);
 			
 			H_diag_buffer = H[j];
-			cout << "H_diag_buffer = " << H_diag_buffer << endl;
 			// H[i,j] = max(H[i-1,j-1] + BLOSUM62, E[i,j], F[i,j], 0)
 			H[j] = max( max( H_diag + (int) blosum(prot.getResidue(j-1), (int) query.getResidue(i-1)), E ), max( F[j], 0 ));
 			
 			H_diag = H_diag_buffer; // H[i-1,j-1] sauvé pour la prochaine itération
 			
-			cout << "H_diag = " << H_diag << endl;
-			cout << "E = " << E << endl;
-			
-			cout << "H[j] = " << H[j] << endl;
-			cout << "score = " << score << endl;
 			// score = max(H[i,j]) où 0<=i<=n et 0<=j<=m
 			if (H[j] > score) {
 				score = H[j];
@@ -64,6 +58,8 @@ void gotoh(Database& data, ScoreMatrix& blosum, Query& query, int protIndex, int
 		}
 	}
 	
+	pair<int, int> result (protIndex, score);
+	results[protIndex] = result;
 }
 
 int main(int argc, char* argv[]) {
@@ -74,12 +70,11 @@ int main(int argc, char* argv[]) {
 	time_t start, end;
 	time(&start);
 	
-	// Vérification Arguments
+	//== Vérification Arguments ==//
 	if (argc != 6) { // argv[0] est le nom de la fonction
 		cout << "5 arguments attendus : [database] [query_protein] [blosum62_matrix] [gap_penalty] [extend_gap_penalty]" << endl;
 		return EXIT_FAILURE;
 	}
-	
 	char* database_path = argv[1];
 	char* protein_path = argv[2];
 	string blosum_path = argv[3]; 
@@ -102,10 +97,39 @@ int main(int argc, char* argv[]) {
 	
 	int sum_penalty = ext_penalty + penalty;
 	
-	gotoh(Database& data, ScoreMatrix& blosum, Query& query, int protIndex, int ext_penalty, int sum_penalty);
+	int nbrSequences = data.getNbrSequences();
+	vector<pair<int, int>> results; // Vecteur <index, score>
+	results.resize(nbrSequences); // nbrSequence = max(index)
+	
+	int nbrThreads = thread::hardware_concurrency(); // Retourne le nombre de threads ordinateurs (= nombre de coeurs du processeur)
+	
+	ThreadPool* pool = new ThreadPool(nbrThreads);
+	
+	//Ajoute les taches à faire
+	for (int i = 0; i < nbrSequences; i++) {
+		pool->addJob(bind(gotoh, ref(data), ref(blosum), ref(query), ref(results), i, ext_penalty, sum_penalty));
+	}
+	
+	delete pool; // Fin de gotoh
+	
+	// Trie toutes les protéines
+	sort(results.begin(), results.end(), [](pair<int, int> &left, pair<int, int> &right) {
+		return left.second > right.second;
+	}); 
+	// Optimisation possible -> Enlever des protéines de la liste au fur et à mesure
+	
+	// Donne les 30 premieres protéines selon leur score
+	for (int i = 0; i < 30; i++) {
+		Protein & prot = data.getProtein(results[i].first); 
+		cout << "Score = " << results[i].second << endl;
+		cout << "    ";
+		prot.print();
+		cout << endl;
+	}
 	
 	time(&end);
 	int t_exec = difftime(end, start);
 	cout << "Temps d'éxecution : " << t_exec << " secondes" << endl;
+	
 	return 0;
 }
