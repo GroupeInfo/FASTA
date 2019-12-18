@@ -14,7 +14,6 @@ class Query : public Protein{
 		Query(char* sequence, int length, string header);
 		~Query();
 		
-		//load the header and the sequence of a protein from a fasta file containing only one protein
 		void loadFromFile(const string filename);
 		char getChar(char letter);
 		int getInt(char letter);
