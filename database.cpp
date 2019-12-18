@@ -9,13 +9,13 @@ using namespace std;
 Database::Database(string filename) {
 	//== Constructeur ==//
 	this->filename = filename;
-	data(filename);
+	loadData(filename);
 	print();
-	proteins(filename);
-	headers(filename);
+	loadProteins(filename);
+	loadHeaders(filename);
 }
 
-void Database::data(const string &filename) {
+void Database::loadData(const string &filename) {
 	//== Partie d'extraction d'information du fichier .pin ==//
 	ifstream pinFile;
 	pinFile.open(filename + ".pin", ios::binary | ios::in);
@@ -42,7 +42,7 @@ void Database::data(const string &filename) {
 	
 	//-Title-//
 	char titleString[titleLength];
-	for(int i=0; i<titleLength; ++i){
+	for(unsigned int i=0; i<titleLength; ++i){
 		pinFile.read((char*)&titleString[i], sizeof(char));
 	}
 	title = (string)titleString;
@@ -53,7 +53,7 @@ void Database::data(const string &filename) {
 	
 	//-Timestamp-//
 	char timestampcopy[timestampLength];
-	for(int i=0; i<timestampLength; ++i){
+	for(unsigned int i=0; i<timestampLength; ++i){
 		pinFile.read((char*)&timestampcopy[i], sizeof(char));
 	}
 	timestamp = string(timestampcopy);
@@ -72,21 +72,21 @@ void Database::data(const string &filename) {
 	//-HeaderOffsetTable-//
 	headerOffsets.reserve(nbrSequences+1); 		//fix the size of the vector
 	uint32_t offset; 						//the offset is get as 4 bytes before convert it into an integer
-	for (int i = 0; i <= nbrSequences; i++) {
+	for (unsigned int i = 0; i <= nbrSequences; i++) {
 		pinFile.read((char*) &offset, sizeof(uint32_t));
 		headerOffsets.push_back(__builtin_bswap32(offset)); //convert bytes and store them as integer
 	}	
 	
 	//-SequenceOffsetTable-//
 	sequenceOffsets.reserve(nbrSequences+1); 	//fix the size of the vector
-	for (int i = 0; i <= nbrSequences; i++) {
+	for (unsigned int i = 0; i <= nbrSequences; i++) {
 		pinFile.read((char*) &offset, sizeof(uint32_t));
 		sequenceOffsets.push_back(__builtin_bswap32(offset)); //convert bytes and store them as integer
 	}
 	pinFile.close();
 }
 
-void Database::proteins(const string &filename) {
+void Database::loadProteins(const string &filename) {
 	//== Partie d'extraction d'informations du fichier .psq ==//
 	ifstream psqFile;
 	psqFile.open(filename + ".psq", ios::binary | ios::in);
@@ -99,7 +99,7 @@ void Database::proteins(const string &filename) {
 	}
 	//--Extraction--//
 	int sequenceLength;
-	for (int i = 0; i < nbrSequences ; i++){
+	for (unsigned int i = 0; i < nbrSequences ; i++){
 		
 		char firstByte[1];  
 		psqFile.read((char*) &firstByte, sizeof(firstByte));
@@ -114,7 +114,7 @@ void Database::proteins(const string &filename) {
 	psqFile.close();
 }
 
-void Database::headers(const string &filename) {
+void Database::loadHeaders(const string &filename) {
 	//== Partie d'extraction d'informations du fichier .phr ==//
 	
 	ifstream phrFile;
@@ -128,7 +128,7 @@ void Database::headers(const string &filename) {
 	}
 	//--Extraction--//
 	int headerLength;
-	for (int i = 0; i < nbrSequences ; i++){  
+	for (unsigned int i = 0; i < nbrSequences ; i++){  
 		
 		headerLength = headerOffsets[i+1] - headerOffsets[i];
 		char header[headerLength];

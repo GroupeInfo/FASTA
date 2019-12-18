@@ -29,8 +29,7 @@ class Database {
 	public : 
 		Database(string dbName);
 		//~Database();
-		void printInfos(std::ostream & out = std::cout);
-		void loadDb(const string dbName);
+		void print(std::ostream & out = std::cout);
 		Protein & getProtein(unsigned int index); 
 		int getNbrSequences();
 		
